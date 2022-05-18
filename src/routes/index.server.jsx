@@ -12,26 +12,29 @@ import gql from 'graphql-tag';
 import Layout from '../components/Layout.server';
 import FeaturedCollection from '../components/FeaturedCollection';
 import ProductCard from '../components/ProductCard';
+import ProductList from '../components/ProductList';
+import LoadMore from '../components/LoadMore.client';
 import Welcome from '../components/Welcome.server';
 import {Suspense} from 'react';
 
-export default function Index() {
+// Fetch the first three products on the product list page.
+export default function Index({first = 3 }) {
   const {countryCode = 'US'} = useSession();
+  const {data} = useShopQuery({
+    query: PRODUCT_QUERY,
+    variables: {
+      first,
+    },
+  })
+
+   // Transform Shopify storefront relay data into a flat array of objects.
+  const products = flattenConnection(data.products);
 
   return (
-    <Layout hero={<GradientBackground />}>
-      <Suspense fallback={null}>
-        <SeoForHomepage />
-      </Suspense>
-      <div className="relative mb-12">
-        <Welcome />
-        <Suspense fallback={<BoxFallback />}>
-          <FeaturedProductsBox country={countryCode} />
-        </Suspense>
-        <Suspense fallback={<BoxFallback />}>
-          <FeaturedCollectionBox country={countryCode} />
-        </Suspense>
-      </div>
+    <Layout>
+      <LoadMore current={first}>
+        <ProductList products={products} />
+      </LoadMore>
     </Layout>
   );
 }
@@ -199,6 +202,105 @@ const SEO_QUERY = gql`
     }
   }
 `;
+
+// Define the GraphQL query.
+const PRODUCT_QUERY = gql`
+  query HomeQuery(
+    $first: Int!
+  ) {
+    products(first: $first) {
+      edges {
+        node {
+          handle
+          id
+          media(first: 10) {
+            edges {
+              node {
+                ... on MediaImage {
+                  mediaContentType
+                  image {
+                    id
+                    url
+                    altText
+                    width
+                    height
+                  }
+                }
+              }
+            }
+          }
+          metafields(first: 3) {
+            edges {
+              node {
+                id
+                type
+                namespace
+                key
+                value
+                createdAt
+                updatedAt
+                description
+                reference {
+                  __typename
+                  ... on MediaImage {
+                    id
+                    mediaContentType
+                    image {
+                      id
+                      url
+                      altText
+                      width
+                      height
+                    }
+                  }
+                }
+              }
+            }
+          }
+          priceRange {
+            maxVariantPrice {
+              currencyCode
+              amount
+            }
+            minVariantPrice {
+              currencyCode
+              amount
+            }
+          }
+          title
+          variants(first: 250) {
+            edges {
+              node {
+                id
+                title
+                availableForSale
+                image {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceV2 {
+                  currencyCode
+                  amount
+                }
+                compareAtPriceV2 {
+                  currencyCode
+                  amount
+                }
+                selectedOptions {
+                  name
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  `
 
 const QUERY = gql`
   query indexContent($country: CountryCode, $language: LanguageCode)
