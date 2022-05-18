@@ -31,7 +31,7 @@ export default function Gallery() {
     >
       <Image
         fetchpriority="high"
-        data={selectedVariant.image}
+        data={selectedVariant.image} altText={selectedVariant.handle}
         className="w-[80vw] md:w-full h-full md:h-auto object-cover object-center flex-shrink-0 md:flex-shrink-none snap-start md:col-span-2 border border-gray-200 rounded-lg"
       />
       {galleryMedia.map((med) => {
