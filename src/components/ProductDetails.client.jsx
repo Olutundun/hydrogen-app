@@ -26,18 +26,9 @@ function AddToCartMarkup() {
         className={BUTTON_PRIMARY_CLASSES}
         disabled={isOutOfStock}
       >
-        {isOutOfStock ? 'Out of stock' : 'Add to bag'}
+        {isOutOfStock ? 'Out of stock' : 'Add to Cart'}
       </AddToCartButton>
-      {isOutOfStock ? (
-        <p className="text-black text-center">Available in 2-3 weeks</p>
-      ) : (
-        <BuyNowButton
-          variantId={selectedVariant.id}
-          className={BUTTON_SECONDARY_CLASSES}
-        >
-          Buy it now
-        </BuyNowButton>
-      )}
+
     </div>
   );
 }

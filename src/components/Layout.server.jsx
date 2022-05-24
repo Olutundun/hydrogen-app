@@ -30,6 +30,7 @@ export default function Layout({children, hero}) {
   const collections = data ? flattenConnection(data.collections) : null;
   const products = data ? flattenConnection(data.products) : null;
   const storeName = data ? data.shop.name : '';
+  const pages = data ? flattenConnection(data.pages) : null
 
   return (
     <LocalizationProvider preload="*">
@@ -44,7 +45,7 @@ export default function Layout({children, hero}) {
       <div className="min-h-screen max-w-screen text-gray-700 font-sans">
         {/* TODO: Find out why Suspense needs to be here to prevent hydration errors. */}
         <Suspense fallback={null}>
-          <Header collections={collections} storeName={storeName} />
+          <Header collections={collections} storeName={storeName} pages={pages} />
           <Cart />
         </Suspense>
         <main role="main" id="mainContent" className="relative bg-gray-50">
@@ -87,7 +88,15 @@ const QUERY = gql`
         node {
           handle
         }
+      } 
+    }
+  pages(first: 1) {
+    edges{
+      node{
+        title
       }
     }
+  }
+
   }
 `;
